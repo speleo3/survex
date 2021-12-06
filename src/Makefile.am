@@ -13,6 +13,7 @@ noinst_HEADERS = cavern.h commands.h cmdline.h date.h datain.h debug.h\
  export3d.h exportfilter.h hpgl.h cavernlog.h aboutdlg.h aven.h avenpal.h\
  gfxcore.h json.h log.h mainfrm.h pos.h vector3.h wx.h\
  aventreectrl.h export.h model.h printing.h avenprcore.h img2aven.h\
+ shortestpath.h \
  thgeomag.h thgeomagdata.h moviemaker-legacy.cc
 
 LDADD = $(LIBOBJS)
@@ -47,6 +48,7 @@ aven_SOURCES = aven.cc gfxcore.cc mainfrm.cc model.cc vector3.cc aboutdlg.cc \
  brotatemask.xbm brotate.xbm handmask.xbm hand.xbm \
  rotatemask.xbm rotate.xbm vrotatemask.xbm vrotate.xbm \
  rotatezoom.xbm rotatezoommask.xbm \
+ shortestpath.cc \
  $(COMMONSRC)
 
 dump3d_SOURCES = dump3d.c date.c img_for_survex.c \
