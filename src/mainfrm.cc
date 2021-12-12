@@ -34,7 +34,6 @@
 #include "printing.h"
 #include "filename.h"
 #include "useful.h"
-#include "shortestpath.h"
 
 #include <wx/confbase.h>
 #include <wx/dnd.h>
@@ -1883,11 +1882,6 @@ void MainFrm::ShowInfo(const LabelInfo *here, const LabelInfo *there)
     s += here->name_or_anon();
     m_Gfx->SetHere(here);
     m_Tree->SetHere(here->tree_id);
-
-    if (there) {
-        auto p = svx::shortestpath(*this, *here, *there);
-        printf("shortest %f\n", p.first);
-    }
 
     if (m_Gfx->ShowingMeasuringLine() && there) {
 	Vector3 delta = *here - *there;

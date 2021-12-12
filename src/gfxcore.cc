@@ -41,6 +41,7 @@
 #include "printing.h"
 #include "guicontrol.h"
 #include "moviemaker.h"
+#include "shortestpath.h"
 
 #include <wx/confbase.h>
 #include <wx/wfstream.h>
@@ -506,6 +507,21 @@ void GfxCore::OnPaint(wxPaintEvent&)
 		DrawBlob(tx, ty);
 		EndBlobs();
 	    }
+            if (m_there && m_here && m_here != &temp_here) {
+                auto const p = svx::shortestpath(*m_Parent, *m_here, *m_there);
+                if (p.second.size() > 1) {
+                    printf("shortest %f m %d stations\n", p.first,
+                           int(p.second.size()));
+                    SetDataTransform();
+                    glLineWidth(5);
+                    BeginPolyline();
+                    for (auto const& pt : p.second) {
+                        PlaceVertex(pt);
+                    }
+                    EndPolyline();
+                    glLineWidth(1);
+                }
+            }
 	}
 
 	FinishDrawing();
