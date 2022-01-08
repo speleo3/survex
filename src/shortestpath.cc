@@ -36,29 +36,57 @@ namespace svx {
 
 using ConnectedStationKey = Vector3;
 
+template <typename T>
+std::vector<T const*> const& const_item_cast(std::vector<T*> const& v) {
+    return reinterpret_cast<std::vector<T const*> const&>(v);
+}
+
 /**
  * Station with an adjacency list of connected stations.
  */
 class ConnectedStation {
-    using Connected_t = std::vector<ConnectedStation const*>;
+    using Connected_t = std::vector<ConnectedStation *>;
+    using Connected_const_t = std::vector<ConnectedStation const*> const;
 
     ConnectedStationKey const& m_point;
     Connected_t m_connected;
+    unsigned m_disjunct_set_index = 0;
 
   public:
     ConnectedStation(ConnectedStationKey const& p) : m_point(p) {}
 
-    Connected_t const& connected() const { return m_connected; }
+    Connected_const_t & connected() const {
+        return const_item_cast(m_connected);
+    }
 
     Vector3 const& point() const { return m_point; }
 
     void connect(ConnectedStation& other) {
+        assert(m_disjunct_set_index == 0);
         m_connected.push_back(&other);
         other.m_connected.push_back(this);
     }
 
     double distance(ConnectedStation const& other) const {
         return (m_point - other.m_point).magnitude();
+    }
+
+    unsigned disjunct_set_index() const { return m_disjunct_set_index; }
+
+    bool add_to_disjunct_set(unsigned set_num) {
+        assert(set_num > 0);
+
+        if (m_disjunct_set_index != 0) {
+            return false;
+        }
+
+        m_disjunct_set_index = set_num;
+
+        for (auto* y : m_connected) {
+            y->add_to_disjunct_set(set_num);
+        }
+
+        return true;
     }
 };
 
@@ -96,6 +124,13 @@ class ConnectedStationSet {
                 }
             }
         }
+
+        unsigned current_set = 1;
+        for (auto& item : m_data) {
+            if (item.second.add_to_disjunct_set(current_set)) {
+                ++current_set;
+            }
+        }
     }
 };
 
@@ -110,6 +145,10 @@ class ConnectedStationSet {
  */
 static std::pair<double, std::vector<ConnectedStation const*>>
 shortestpath(ConnectedStation const& self, ConnectedStation const& other) {
+    if (self.disjunct_set_index() != other.disjunct_set_index()) {
+        return {-1, {}};
+    }
+
     auto const* const self_ptr = &self;
     auto const* const other_ptr = &other;
 
