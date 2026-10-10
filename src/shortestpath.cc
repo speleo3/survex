@@ -101,8 +101,9 @@ class ConnectedStationSet {
         return m_data.try_emplace(point, point).first->second;
     }
 
-    ConnectedStation const& at(ConnectedStationKey const& point) const {
-        return m_data.at(point);
+    ConnectedStation const* find(ConnectedStationKey const& point) const {
+        auto const it = m_data.find(point);
+        return it == m_data.end() ? nullptr : &it->second;
     }
 
     ConnectedStationSet(Model const& model) {
@@ -166,7 +167,7 @@ shortestpath(ConnectedStation const& self, ConnectedStation const& other) {
     auto f_score = std::map<ConnectedStation const*, double>{
         {self_ptr, h_score[self_ptr]}}; // Estimated total distance from self
                                         // to other through y.
-    while (openset.size() > 0) {
+    while (!openset.empty()) {
         auto const* const x = openset.front();
         openset.pop_front();
 
@@ -226,7 +227,14 @@ shortestpath(ConnectedStation const& self, ConnectedStation const& other) {
 std::pair<double, std::vector<Vector3>>
 shortestpath(Model const& model, Vector3 const& start, Vector3 const& end) {
     auto const stations = svx::ConnectedStationSet(model);
-    auto [dist, path] = svx::shortestpath(stations.at(start), stations.at(end));
+    auto* station_start = stations.find(start);
+    auto* station_end = stations.find(end);
+
+    if (!station_start || !station_end) {
+        return {-1, {}};
+    }
+
+    auto [dist, path] = svx::shortestpath(*station_start, *station_end);
 
     std::vector<Vector3> vecpath;
 
