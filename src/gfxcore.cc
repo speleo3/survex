@@ -510,7 +510,7 @@ void GfxCore::OnPaint(wxPaintEvent&)
             if (m_there && m_here && m_here != &temp_here) {
                 auto const p = svx::shortestpath(*m_Parent, *m_here, *m_there);
                 if (p.second.size() > 1) {
-                    printf("shortest %f m %d stations\n", p.first,
+                    printf("shortest %.2f m %d stations\n", p.first,
                            int(p.second.size()));
                     SetDataTransform();
                     glLineWidth(5);
@@ -520,6 +520,9 @@ void GfxCore::OnPaint(wxPaintEvent&)
                     }
                     EndPolyline();
                     glLineWidth(1);
+                    DrawText(p.second.front().GetX(), p.second.front().GetY(),
+                             p.second.front().GetZ(),
+                             wxString::Format("  %.2fm", p.first));
                 }
             }
 	}
